@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Fragment;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -15,13 +16,28 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 
-class zh extends PluginBase implements Listener {
+class FragMent extends PluginBase implements Listener {
+
+    private static $instance = null;
+
+    public static function getInstance() {
+        return self::$instance;
+    }
+
+    public function onLoad()
+    {
+        self::$instance = $this;
+    }
+
     public function onEnable() {
       
 	  @mkdir($this->getDataFolder());
 		
         // @mkdir($this->getDataFolder() , 0777, true);
         $this->cfg = new Config($this->getDataFolder() . "Config.yml", CONFIG::YAML, array(
+            "如果您有安装" => "Fancy团队底部插件的话",
+            "如果您不想开启替换碎片" => "请把替换物品值改为0",
+            "如果您有开启替换开关"=>"那么必须填写替换的物品名称",
             "碎片1" => "铁链胸甲左",
             "碎片2" => "铁链胸甲右",
             "碎片3" => "铁链胸甲上",
@@ -31,7 +47,9 @@ class zh extends PluginBase implements Listener {
 			"替换特殊值" => "0",
 			"替换数量" => "1",
 			"替换开关"=>"关",
-			"全局开关"=>"开"
+			"全局开关"=>"开",
+            "替换物品名称"=>""
+
         ));
 		
 		$this->date=new Config($this->getDataFolder()."Date.yml",Config::YAML,array());
@@ -45,11 +63,14 @@ class zh extends PluginBase implements Listener {
 		
 		
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$this->getLogger()->info("§b=============§e幻星碎片§b============");
-		$this->getLogger()->info("§b作者:Magic雪飞 §6来自:FancyDream Team");
+
+		$this->getLogger()->info("§b   =============§e繁星碎片§b============");
+		$this->getLogger()->info("§b    作者:Magic雪飞 §6来自:Fancy团队");
         $this->getLogger()->info("§a本插件完全免费!已在GitHub开源,转载请注明");
-		$this->getLogger()->info("§e插件版本1.0.1，已进行一次更新 分别是以下");
-	    $this->getLogger()->info("§7更新了碎片5的几率和赠送奖励和新增召唤卡");
+		$this->getLogger()->info("§e插件版本1.0.2，已进行第二次更新 分别是以下");
+	    $this->getLogger()->info("§7 更新了碎片5的几率和赠送奖励和新增召唤卡");
+        $this->getLogger()->info("§b更新了其他插件可以获取的API 请前往Git查看");
+        $this->getLogger()->info(" 极致插件 来自github.com/MagicBloodFLY");
     }
     public function onJoin(PlayerJoinEvent $e) {
 		
@@ -178,11 +199,15 @@ class zh extends PluginBase implements Listener {
 	}
 	
 	
-    public function onCommand(CommandSender $s, Command $cmd, $label, array $args) {
+    public function onCommand(CommandSender $s, Command $cmd, string $label, array $args):bool
+	{
      
 	 if($this->cfg->get("全局开关")=="关")
 		{
-			return;
+			
+		$s->sendMessage("当前未开放碎片收集,请等待腐竹开放！");
+			
+			return false;
 		}
 	  
         $n = $s->getName();
@@ -392,5 +417,41 @@ class zh extends PluginBase implements Listener {
 	public function msg($msg,Player $p){
 		if(!empty($msg)) $p->sendMessage($msg);
 	}
+
+	//自定义函数
+    public function getStatus(string $name)
+    {
+
+
+        $n = $this->pl->get($name."合成状态");
+
+       return $n;
+
+    }
+
+    public function getFragID()
+    {
+         $Fragid = $this->cfg->get("替换物品");
+
+         return $Fragid;
+
+    }
+    public function getFragName()
+    {
+        $fragname = $this->cfg->get("替换物品名称");
+
+        return $fragname;
+    }
+	
+	public function getNumber(string $name)
+	{
+		$number = $this->pl->get($name);
+		
+		return $number;
+		
+	}
+
+
+
 }
 
